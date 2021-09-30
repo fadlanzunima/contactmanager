@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { Consumer } from "../../context";
 import TextInputGroup from "../layout/TextInputGroup";
-import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 
 class AddContact extends Component {
@@ -30,19 +29,19 @@ class AddContact extends Component {
       return;
     }
 
-    const newContact = {
-      id: uuidv4(),
+    const updateContact = {
       name,
       email,
       phone,
     };
 
     //Add data to array in Context
-    const response = await axios.post(
-      `https://jsonplaceholder.typicode.com/todos`,
-      newContact
+    const { id } = this.props.match.params;
+    const response = await axios.put(
+      `https://jsonplaceholder.typicode.com/users/${id}`,
+      updateContact
     );
-    dispatch({ type: "ADD_CONTACT", payload: response.data });
+    dispatch({ type: "UPDATE_CONTACT", payload: response.data });
 
     //Clear state
     this.setState({
@@ -58,6 +57,20 @@ class AddContact extends Component {
   onChange = (e) => {
     this.setState({ [e.target.name]: e.target.value });
   };
+
+  async componentDidMount() {
+    const { id } = this.props.match.params;
+    const response = await axios.get(
+      `https://jsonplaceholder.typicode.com/users/${id}`
+    );
+    const { name, email, phone } = response.data;
+
+    this.setState({
+      name,
+      email,
+      phone,
+    });
+  }
 
   render() {
     const { name, email, phone, errors } = this.state;
@@ -103,7 +116,7 @@ class AddContact extends Component {
                   {/* Component Group Form  */}
                   <input
                     type="submit"
-                    value="Add Contact"
+                    value="Update Contact"
                     className="w-100 btn btn-light btn-lg btn-block"
                   />
                 </form>
